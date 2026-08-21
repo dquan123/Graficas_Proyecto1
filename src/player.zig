@@ -9,6 +9,7 @@ pub const Player = struct {
 
     move_speed: f32 = 100.0, // unidades de mundo por segundo
     rot_speed: f32 = 2.5, // radianes por segundo
+    mouse_sensitivity: f32 = 0.003,
 
     pub fn init(x: f32, y: f32, angle: f32) Player {
         return Player{ .x = x, .y = y, .angle = angle };
@@ -57,8 +58,11 @@ pub const Player = struct {
             self.y = new_y;
         }
 
-        // Rotación temporal con flechas -- en un paso posterior la reemplazamos
-        // por movimiento del mouse (vale más puntos según la rúbrica).
+        // Rotación con mouse (solo horizontal, como pide el enunciado).
+        const mouse_delta = rl.getMouseDelta();
+        self.angle += mouse_delta.x * self.mouse_sensitivity;
+
+        // Dejamos las flechas como respaldo/alternativa, no estorban.
         if (rl.isKeyDown(.right)) self.angle += self.rot_speed * dt;
         if (rl.isKeyDown(.left)) self.angle -= self.rot_speed * dt;
     }

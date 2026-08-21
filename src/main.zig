@@ -12,6 +12,10 @@ pub fn main(init: std.process.Init) !void {
     const io = init.io;
 
     rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Raycaster");
+
+    rl.disableCursor(); // oculta el cursor y lo "atrapa" dentro de la ventana
+
+    defer rl.enableCursor();
     defer rl.closeWindow();
     rl.setTargetFPS(60);
 
