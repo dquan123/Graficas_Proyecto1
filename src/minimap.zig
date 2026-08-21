@@ -2,6 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const map = @import("map.zig");
 const Player = @import("player.zig").Player;
+const raycaster = @import("raycaster.zig");
 
 const MINIMAP_SCALE: f32 = 6.0; // píxeles por celda del grid, dentro del minimapa
 const MARGIN: i32 = 10; // separación del borde de la pantalla
@@ -36,11 +37,15 @@ pub fn draw(screen_width: i32, player: *const Player) void {
     const player_py = origin_y + @as(i32, @intFromFloat(player_grid_y * MINIMAP_SCALE));
 
     rl.drawCircle(player_px, player_py, 3, .red);
-    rl.drawLine(
-        player_px,
-        player_py,
-        player_px + @as(i32, @intFromFloat(@cos(player.angle) * 8)),
-        player_py + @as(i32, @intFromFloat(@sin(player.angle) * 8)),
-        .yellow,
-    );
+
+    // Lanzamos un rayo real en la dirección del jugador, igual que hacemos
+    // para las 800 columnas de la vista 3D, para saber exactamente dónde
+    // choca con una pared -- así la línea del minimapa refleja la realidad.
+    const hit = raycaster.castRay(player.x, player.y, player.angle);
+    const hit_grid_x = hit.hit_x / map.CELL_SIZE;
+    const hit_grid_y = hit.hit_y / map.CELL_SIZE;
+    const hit_px = origin_x + @as(i32, @intFromFloat(hit_grid_x * MINIMAP_SCALE));
+    const hit_py = origin_y + @as(i32, @intFromFloat(hit_grid_y * MINIMAP_SCALE));
+
+    rl.drawLine(player_px, player_py, hit_px, hit_py, .yellow);
 }
