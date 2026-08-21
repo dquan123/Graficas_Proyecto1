@@ -3,6 +3,7 @@ const rl = @import("raylib");
 const map = @import("map.zig");
 const raycaster = @import("raycaster.zig");
 const Player = @import("player.zig").Player;
+const minimap = @import("minimap.zig");
 
 const SCREEN_WIDTH = 800;
 const SCREEN_HEIGHT = 600;
@@ -19,7 +20,7 @@ pub fn main(init: std.process.Init) !void {
     defer rl.closeWindow();
     rl.setTargetFPS(60);
 
-    var player = Player.init(3 * map.CELL_SIZE, 3 * map.CELL_SIZE, 0);
+    var player = Player.init(10.5 * map.CELL_SIZE, 8.5 * map.CELL_SIZE, 0);
 
     const dist_to_projection_plane = (SCREEN_WIDTH / 2.0) / @tan(FOV / 2.0);
 
@@ -71,6 +72,8 @@ pub fn main(init: std.process.Init) !void {
 
             rl.drawLine(col, wall_top, col, wall_bottom, color);
         }
+
+        minimap.draw(SCREEN_WIDTH, &player);
 
         rl.drawFPS(10, 10);
 
