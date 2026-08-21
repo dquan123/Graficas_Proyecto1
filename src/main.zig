@@ -10,6 +10,11 @@ const SCREEN_WIDTH = 800;
 const SCREEN_HEIGHT = 600;
 const FOV: f32 = std.math.pi / 3.0; // 60 grados
 
+const GameState = enum {
+    welcome,
+    playing,
+};
+
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
 
@@ -21,6 +26,7 @@ pub fn main(init: std.process.Init) !void {
     defer rl.closeWindow();
     rl.setTargetFPS(60);
 
+    var state: GameState = .welcome;
     var player = Player.init(10.5 * map.CELL_SIZE, 8.5 * map.CELL_SIZE, 0);
     var z_buffer: [SCREEN_WIDTH]f32 = undefined;
     var torch = Sprite{ .x = 14.5 * map.CELL_SIZE, .y = 8.5 * map.CELL_SIZE };
@@ -36,56 +42,62 @@ pub fn main(init: std.process.Init) !void {
         dt /= 1_000_000_000;
         last = now;
 
-        player.update(dt);
+        switch (state) {
+            .welcome => {
+                if (rl.isKeyPressed(.enter)) {
+                    state = .playing;
+                }
 
-        rl.beginDrawing();
+                rl.beginDrawing();
+                rl.clearBackground(.black);
 
-        // Techo y piso: dos rectángulos simples por ahora (los mejoramos
-        // luego con texturas si da tiempo). Esto también reemplaza el
-        // "clearBackground" -- ya estamos pintando toda la pantalla.
-        rl.drawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2, .dark_gray);
-        rl.drawRectangle(0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2, .gray);
+                rl.drawText("RAYCASTER", 260, 200, 50, .white);
+                rl.drawText("Presiona ENTER para jugar", 240, 300, 20, .light_gray);
+                rl.drawText("WASD para moverte -- Mouse para mirar", 220, 340, 18, .gray);
 
-        var col: i32 = 0;
-        while (col < SCREEN_WIDTH) : (col += 1) {
-            const t: f32 = @as(f32, @floatFromInt(col)) / @as(f32, SCREEN_WIDTH);
-            const ray_angle = player.angle - FOV / 2.0 + FOV * t;
+                rl.endDrawing();
+            },
+            .playing => {
+                player.update(dt);
+                torch.update(dt);
 
-            const hit = raycaster.castRay(player.x, player.y, ray_angle);
+                rl.beginDrawing();
 
-            var corrected_dist = hit.distance * @cos(ray_angle - player.angle);
+                rl.drawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2, .dark_gray);
+                rl.drawRectangle(0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2, .gray);
 
-            z_buffer[@intCast(col)] = corrected_dist;
+                var col: i32 = 0;
+                while (col < SCREEN_WIDTH) : (col += 1) {
+                    const t: f32 = @as(f32, @floatFromInt(col)) / @as(f32, SCREEN_WIDTH);
+                    const ray_angle = player.angle - FOV / 2.0 + FOV * t;
 
-            // Evita división entre cero / distancias absurdamente chicas
-            // cuando el jugador está pegado a una pared.
-            corrected_dist = @max(corrected_dist, 1.0);
+                    const hit = raycaster.castRay(player.x, player.y, ray_angle);
 
-            const wall_height = (map.CELL_SIZE / corrected_dist) * dist_to_projection_plane;
+                    var corrected_dist = hit.distance * @cos(ray_angle - player.angle);
+                    z_buffer[@intCast(col)] = corrected_dist;
+                    corrected_dist = @max(corrected_dist, 1.0);
 
-            var wall_top_f = SCREEN_HEIGHT / 2.0 - wall_height / 2.0;
-            var wall_bottom_f = SCREEN_HEIGHT / 2.0 + wall_height / 2.0;
+                    const wall_height = (map.CELL_SIZE / corrected_dist) * dist_to_projection_plane;
 
-            // Clamp para que nunca se salga del rango seguro de un i32,
-            // sin importar qué tan extrema sea wall_height.
-            wall_top_f = std.math.clamp(wall_top_f, -10000.0, 10000.0);
-            wall_bottom_f = std.math.clamp(wall_bottom_f, -10000.0, 10000.0);
+                    var wall_top_f = SCREEN_HEIGHT / 2.0 - wall_height / 2.0;
+                    var wall_bottom_f = SCREEN_HEIGHT / 2.0 + wall_height / 2.0;
+                    wall_top_f = std.math.clamp(wall_top_f, -10000.0, 10000.0);
+                    wall_bottom_f = std.math.clamp(wall_bottom_f, -10000.0, 10000.0);
 
-            const wall_top: i32 = @intFromFloat(wall_top_f);
-            const wall_bottom: i32 = @intFromFloat(wall_bottom_f);
+                    const wall_top: i32 = @intFromFloat(wall_top_f);
+                    const wall_bottom: i32 = @intFromFloat(wall_bottom_f);
 
-            const color = wallColor(hit.wall_type, hit.side);
+                    const color = wallColor(hit.wall_type, hit.side);
+                    rl.drawLine(col, wall_top, col, wall_bottom, color);
+                }
 
-            rl.drawLine(col, wall_top, col, wall_bottom, color);
+                torch.draw(player.x, player.y, player.angle, FOV, SCREEN_WIDTH, SCREEN_HEIGHT, dist_to_projection_plane, &z_buffer);
+                minimap.draw(SCREEN_WIDTH, &player);
+                rl.drawFPS(10, 10);
+
+                rl.endDrawing();
+            },
         }
-
-        torch.draw(player.x, player.y, player.angle, FOV, SCREEN_WIDTH, SCREEN_HEIGHT, dist_to_projection_plane, &z_buffer);
-
-        minimap.draw(SCREEN_WIDTH, &player);
-
-        rl.drawFPS(10, 10);
-
-        rl.endDrawing();
     }
 }
 
