@@ -68,6 +68,8 @@ pub fn main(init: std.process.Init) !void {
             rl.drawLine(col, wall_top, col, wall_bottom, color);
         }
 
+        rl.drawFPS(10, 10);
+
         rl.endDrawing();
     }
 }
