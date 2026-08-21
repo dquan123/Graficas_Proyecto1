@@ -1,17 +1,52 @@
 const std = @import("std");
 const rl = @import("raylib");
+const map = @import("map.zig");
+const Player = @import("player.zig").Player;
 
 pub fn main(init: std.process.Init) !void {
-    _ = init;
+    const io = init.io;
 
-    rl.initWindow(800, 600, "Raycaster");
+    rl.initWindow(800, 600, "Raycaster - debug vista de arriba");
     defer rl.closeWindow();
     rl.setTargetFPS(60);
 
+    var player = Player.init(3 * map.CELL_SIZE, 3 * map.CELL_SIZE, 0);
+
+    const Clock = std.Io.Clock.real;
+    var last = Clock.now(io);
+
     while (!rl.windowShouldClose()) {
+        const now = Clock.now(io);
+        var dt: f32 = @floatFromInt(last.durationTo(now).toNanoseconds());
+        dt /= 1_000_000_000;
+        last = now;
+
+        player.update(dt);
+
         rl.beginDrawing();
         rl.clearBackground(.black);
-        rl.drawText("Raycaster funcionando", 250, 280, 20, .white);
+
+        // Dibuja el grid completo, celda por celda.
+        for (0..map.MAP_HEIGHT) |gy| {
+            for (0..map.MAP_WIDTH) |gx| {
+                if (map.grid[gy][gx] != 0) {
+                    const px: i32 = @intFromFloat(@as(f32, @floatFromInt(gx)) * map.CELL_SIZE);
+                    const py: i32 = @intFromFloat(@as(f32, @floatFromInt(gy)) * map.CELL_SIZE);
+                    rl.drawRectangle(px, py, @intFromFloat(map.CELL_SIZE), @intFromFloat(map.CELL_SIZE), .gray);
+                }
+            }
+        }
+
+        // Jugador: un punto rojo + una línea amarilla mostrando hacia dónde mira.
+        rl.drawCircle(@intFromFloat(player.x), @intFromFloat(player.y), 5, .red);
+        rl.drawLine(
+            @intFromFloat(player.x),
+            @intFromFloat(player.y),
+            @intFromFloat(player.x + @cos(player.angle) * 20),
+            @intFromFloat(player.y + @sin(player.angle) * 20),
+            .yellow,
+        );
+
         rl.endDrawing();
     }
 }
