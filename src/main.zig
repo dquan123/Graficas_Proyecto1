@@ -2,6 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 const map = @import("map.zig");
 const Player = @import("player.zig").Player;
+const raycaster = @import("raycaster.zig");
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
@@ -22,6 +23,8 @@ pub fn main(init: std.process.Init) !void {
         last = now;
 
         player.update(dt);
+
+        const hit = raycaster.castRay(player.x, player.y, player.angle);
 
         rl.beginDrawing();
         rl.clearBackground(.black);
@@ -46,6 +49,20 @@ pub fn main(init: std.process.Init) !void {
             @intFromFloat(player.y + @sin(player.angle) * 20),
             .yellow,
         );
+
+        // Dibuja el rayo desde el jugador hasta donde chocó con la pared.
+        rl.drawLine(
+            @intFromFloat(player.x),
+            @intFromFloat(player.y),
+            @intFromFloat(hit.hit_x),
+            @intFromFloat(hit.hit_y),
+            .green,
+        );
+        rl.drawCircle(@intFromFloat(hit.hit_x), @intFromFloat(hit.hit_y), 4, .lime);
+
+        var buf: [64]u8 = undefined;
+        const text = try std.fmt.bufPrintZ(&buf, "dist: {d:.1} tipo: {} lado: {}", .{ hit.distance, hit.wall_type, hit.side });
+        rl.drawText(text, 10, 10, 20, .white);
 
         rl.endDrawing();
     }
