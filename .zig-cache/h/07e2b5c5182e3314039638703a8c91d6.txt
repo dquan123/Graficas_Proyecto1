@@ -836,7 +836,7 @@
 7786 281474977200222 1783727831548463800 402f4b6268e6b3c2b8ea01223ca78713 1 c\unistd.zig
 6713 281474977200223 1783727831556055600 e350b90a859ac3f70b4078fc68950093 1 c\wchar.zig
 184471 281474977285271 1787345006145528500 676ee2ab951e40d0e4ae2327e26cf2df 0 D:\UVG\Ciclo 6\Gráficas por computadora\Proyecto 1\Graficas_Proyecto1\zig-pkg\raylib_zig-6.0.0-KE8RECZ8BQDm-txuospkpZHbJ6DNpacUF7D88RWQ_qAe\lib\raylib.zig
-1848 1970324837527411 1787357151467033800 5a34a3316719fec301156cb93de52371 0 D:\UVG\Ciclo 6\Gráficas por computadora\Proyecto 1\Graficas_Proyecto1\src\map.zig
+1848 1970324837527411 1787358465813019000 4dc665bc01171d3de09c550971712f7a 0 D:\UVG\Ciclo 6\Gráficas por computadora\Proyecto 1\Graficas_Proyecto1\src\map.zig
 2874 1970324837540318 1787346820415954400 ed672880d03ab7437b9d09ee6a435483 0 D:\UVG\Ciclo 6\Gráficas por computadora\Proyecto 1\Graficas_Proyecto1\src\raycaster.zig
 2374 5629499534778851 1787347910439962800 3a14ed6f76e2d1e9a8a08aa2f15b937c 0 D:\UVG\Ciclo 6\Gráficas por computadora\Proyecto 1\Graficas_Proyecto1\src\player.zig
 2580 562949953997559 1787356465091164900 d2331a21c523311d1c286ed5b231ae64 0 D:\UVG\Ciclo 6\Gráficas por computadora\Proyecto 1\Graficas_Proyecto1\src\minimap.zig
