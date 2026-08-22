@@ -13,6 +13,7 @@ const FOV: f32 = std.math.pi / 3.0; // 60 grados
 const GameState = enum {
     welcome,
     playing,
+    won,
 };
 
 pub fn main(init: std.process.Init) !void {
@@ -27,9 +28,9 @@ pub fn main(init: std.process.Init) !void {
     rl.setTargetFPS(60);
 
     var state: GameState = .welcome;
-    var player = Player.init(10.5 * map.CELL_SIZE, 8.5 * map.CELL_SIZE, 0);
+    var player = Player.init(1.5 * map.CELL_SIZE, 1.5 * map.CELL_SIZE, 0);
     var z_buffer: [SCREEN_WIDTH]f32 = undefined;
-    var torch = Sprite{ .x = 14.5 * map.CELL_SIZE, .y = 8.5 * map.CELL_SIZE };
+    var torch = Sprite{ .x = 17.5 * map.CELL_SIZE, .y = 13.5 * map.CELL_SIZE };
 
     const dist_to_projection_plane = (SCREEN_WIDTH / 2.0) / @tan(FOV / 2.0);
 
@@ -60,6 +61,10 @@ pub fn main(init: std.process.Init) !void {
             .playing => {
                 player.update(dt);
                 torch.update(dt);
+
+                if (map.isAtGoal(player.x, player.y)) {
+                    state = .won;
+                }
 
                 rl.beginDrawing();
 
@@ -94,6 +99,24 @@ pub fn main(init: std.process.Init) !void {
                 torch.draw(player.x, player.y, player.angle, FOV, SCREEN_WIDTH, SCREEN_HEIGHT, dist_to_projection_plane, &z_buffer);
                 minimap.draw(SCREEN_WIDTH, &player);
                 rl.drawFPS(10, 10);
+
+                rl.endDrawing();
+            },
+            .won => {
+                if (rl.isKeyPressed(.enter)) {
+                    // Reinicia al jugador de vuelta al spawn y regresa al juego.
+                    player.x = 1.5 * map.CELL_SIZE;
+                    player.y = 1.5 * map.CELL_SIZE;
+                    player.angle = 0;
+                    state = .playing;
+                }
+
+                rl.beginDrawing();
+                rl.clearBackground(.{ .r = 10, .g = 40, .b = 10, .a = 255 });
+
+                rl.drawText("¡LO LOGRASTE!", 230, 220, 50, .green);
+                rl.drawText("Llegaste a la meta", 270, 300, 22, .light_gray);
+                rl.drawText("Presiona ENTER para jugar de nuevo", 200, 340, 18, .gray);
 
                 rl.endDrawing();
             },
