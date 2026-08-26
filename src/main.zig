@@ -23,6 +23,22 @@ pub fn main(init: std.process.Init) !void {
 
     rl.disableCursor(); // oculta el cursor y lo "atrapa" dentro de la ventana
 
+    rl.initAudioDevice();
+    defer rl.closeAudioDevice();
+
+    const music = try rl.loadMusicStream("assets/music.ogg");
+    defer rl.unloadMusicStream(music);
+    rl.playMusicStream(music);
+    rl.setMusicVolume(music, 0.4);
+
+    const footstep_sound = try rl.loadSound("assets/footstep.wav");
+    defer rl.unloadSound(footstep_sound);
+
+    const victory_sound = try rl.loadSound("assets/victory.ogg");
+    defer rl.unloadSound(victory_sound);
+
+    var footstep_timer: f32 = 0.90; // arranca "lista" para sonar de inmediato al primer paso
+
     defer rl.enableCursor();
     defer rl.closeWindow();
     rl.setTargetFPS(60);
@@ -43,6 +59,8 @@ pub fn main(init: std.process.Init) !void {
         dt /= 1_000_000_000;
         last = now;
 
+        rl.updateMusicStream(music);
+
         switch (state) {
             .welcome => {
                 if (rl.isKeyPressed(.enter)) {
@@ -62,8 +80,20 @@ pub fn main(init: std.process.Init) !void {
                 player.update(dt);
                 torch.update(dt);
 
+                const moving = rl.isKeyDown(.w) or rl.isKeyDown(.a) or rl.isKeyDown(.s) or rl.isKeyDown(.d);
+                if (moving) {
+                    footstep_timer += dt;
+                    if (footstep_timer >= 0.35) {
+                        footstep_timer = 0;
+                        rl.playSound(footstep_sound);
+                    }
+                } else {
+                    footstep_timer = 0.35;
+                }
+
                 if (map.isAtGoal(player.x, player.y)) {
                     state = .won;
+                    rl.playSound(victory_sound);
                 }
 
                 rl.beginDrawing();
@@ -108,6 +138,7 @@ pub fn main(init: std.process.Init) !void {
                     player.x = 1.5 * map.CELL_SIZE;
                     player.y = 1.5 * map.CELL_SIZE;
                     player.angle = 0;
+                    rl.stopSound(victory_sound);
                     state = .playing;
                 }
 
