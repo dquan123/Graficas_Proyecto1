@@ -1,6 +1,6 @@
 # Proyecto 1: Raycaster
 
-Diego Quan (24336)
+**Diego Quan (24336)**
 
 Motor de raycasting en tiempo real (estilo Wolfenstein 3D) hecho en Zig 0.16 + raylib, sin usar geometría 3D — todo el renderizado es DDA + proyección de columnas verticales.
 
@@ -36,4 +36,4 @@ Controles: **W/A/S/D** para moverte, **mouse** para rotar la cámara.
 
 ## Video
 
-[link al video de demostración]
+https://youtu.be/GmqXgCbhJ0A
