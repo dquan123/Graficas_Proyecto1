@@ -19,9 +19,6 @@ pub const Player = struct {
         const forward_x = @cos(self.angle);
         const forward_y = @sin(self.angle);
 
-        // El vector perpendicular (para moverte de lado, "strafe" con A/D)
-        // es simplemente el vector de dirección rotado 90 grados.
-        // Rotar 90° en 2D es: (x, y) -> (-y, x).
         const strafe_x = -forward_y;
         const strafe_y = forward_x;
 
@@ -48,9 +45,6 @@ pub const Player = struct {
         const new_x = self.x + move_x * self.move_speed * dt;
         const new_y = self.y + move_y * self.move_speed * dt;
 
-        // Colisión: probamos cada eje POR SEPARADO. Esto permite "deslizarte"
-        // contra una pared en vez de quedarte pegado si te mueves en diagonal
-        // hacia ella (si chocas en X, igual te dejamos mover en Y, y viceversa).
         if (!map.isWall(@intFromFloat(new_x / map.CELL_SIZE), @intFromFloat(self.y / map.CELL_SIZE))) {
             self.x = new_x;
         }
@@ -58,11 +52,11 @@ pub const Player = struct {
             self.y = new_y;
         }
 
-        // Rotación con mouse (solo horizontal, como pide el enunciado).
+        // Rotación con mouse
         const mouse_delta = rl.getMouseDelta();
         self.angle += mouse_delta.x * self.mouse_sensitivity;
 
-        // Dejamos las flechas como respaldo/alternativa, no estorban.
+        // Dejamos las flechas como respaldo
         if (rl.isKeyDown(.right)) self.angle += self.rot_speed * dt;
         if (rl.isKeyDown(.left)) self.angle -= self.rot_speed * dt;
     }

@@ -27,9 +27,6 @@ pub const Sprite = struct {
         }
     }
 
-    /// Dibuja el sprite como un billboard: calcula su posición y tamaño en
-    /// pantalla según la distancia al jugador, y respeta el z-buffer para
-    /// no dibujarse encima de paredes más cercanas.
     pub fn draw(
         self: *const Sprite,
         player_x: f32,
@@ -67,8 +64,6 @@ pub const Sprite = struct {
         const start_clamped = std.math.clamp(draw_start_x, 0, screen_width - 1);
         const end_clamped = std.math.clamp(draw_end_x, 0, screen_width - 1);
 
-        // Igual que las paredes: columna por columna, cada una revisa su
-        // propio valor del z-buffer -- así la oclusión es gradual, no de golpe.
         var col = start_clamped;
         while (col <= end_clamped) : (col += 1) {
             const idx: usize = @intCast(col);

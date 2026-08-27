@@ -2,19 +2,16 @@ const std = @import("std");
 const map = @import("map.zig");
 
 pub const RayHit = struct {
-    distance: f32, // distancia perpendicular
+    distance: f32,
     map_x: i32,
     map_y: i32,
-    side: u8, // 0 = golpeó una pared "vertical" (línea x del grid), 1 = "horizontal"
+    side: u8,
     wall_type: u8,
-    hit_x: f32, // punto de choque, en unidades de mundo
+    hit_x: f32,
     hit_y: f32,
 };
 
-/// Lanza un rayo desde (px, py) en la dirección `angle` (radianes) y
-/// devuelve dónde chocó con una pared, usando DDA.
 pub fn castRay(px: f32, py: f32, angle: f32) RayHit {
-    // Trabajamos en "espacio de grid" (cada celda = 1 unidad), no en píxeles.
     const grid_x = px / map.CELL_SIZE;
     const grid_y = py / map.CELL_SIZE;
 
@@ -24,7 +21,6 @@ pub fn castRay(px: f32, py: f32, angle: f32) RayHit {
     var map_x: i32 = @intFromFloat(@floor(grid_x));
     var map_y: i32 = @intFromFloat(@floor(grid_y));
 
-    // Evitar división entre cero si el rayo va perfectamente horizontal o vertical.
     const delta_dist_x: f32 = if (ray_dir_x == 0) 1e30 else @abs(1.0 / ray_dir_x);
     const delta_dist_y: f32 = if (ray_dir_y == 0) 1e30 else @abs(1.0 / ray_dir_y);
 
@@ -53,9 +49,6 @@ pub fn castRay(px: f32, py: f32, angle: f32) RayHit {
     var hit = false;
     var iterations: u32 = 0;
 
-    // El límite de iteraciones es una red de seguridad: garantiza que NUNCA
-    // podamos quedar en un loop infinito (ej. si el mapa tuviera un hueco
-    // sin bordes), cumpliendo el requisito de "no debe crashear".
     while (!hit and iterations < 1000) : (iterations += 1) {
         if (side_dist_x < side_dist_y) {
             side_dist_x += delta_dist_x;

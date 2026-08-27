@@ -21,7 +21,7 @@ pub fn main(init: std.process.Init) !void {
 
     rl.initWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Raycaster");
 
-    rl.disableCursor(); // oculta el cursor y lo "atrapa" dentro de la ventana
+    rl.disableCursor();
 
     rl.initAudioDevice();
     defer rl.closeAudioDevice();
@@ -37,7 +37,7 @@ pub fn main(init: std.process.Init) !void {
     const victory_sound = try rl.loadSound("assets/victory.ogg");
     defer rl.unloadSound(victory_sound);
 
-    var footstep_timer: f32 = 0.90; // arranca "lista" para sonar de inmediato al primer paso
+    var footstep_timer: f32 = 0.90;
 
     defer rl.enableCursor();
     defer rl.closeWindow();
