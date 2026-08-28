@@ -29,7 +29,7 @@ pub fn main(init: std.process.Init) !void {
     const music = try rl.loadMusicStream("assets/music.ogg");
     defer rl.unloadMusicStream(music);
     rl.playMusicStream(music);
-    rl.setMusicVolume(music, 0.4);
+    rl.setMusicVolume(music, 5);
 
     const footstep_sound = try rl.loadSound("assets/footstep.wav");
     defer rl.unloadSound(footstep_sound);
@@ -155,9 +155,6 @@ pub fn main(init: std.process.Init) !void {
     }
 }
 
-/// Un color distinto por tipo de pared (número del mapa), y un poco más
-/// oscuro en los lados "horizontales" (side == 1) para dar sensación de
-/// profundidad -- es un truco barato pero muy efectivo visualmente.
 fn wallColor(wall_type: u8, side: u8) rl.Color {
     var base: rl.Color = switch (wall_type) {
         1 => .{ .r = 180, .g = 60, .b = 60, .a = 255 },
